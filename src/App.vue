@@ -3,49 +3,47 @@
     <div>
       <h1 class="text-2xl text-green-800">Object detection with Tensorflow</h1>
       <div v-if="!isStreaming">
-        <button @click="openCamera">Open Camera</button>
+        <!-- <button @click="openCamera">Open Camera</button> -->
       </div>
-       <div v-else class="flex justify-between">
-              <button
-                @click="stopStreaming"
-              >
-                Stop Streaming
-              </button>
-              <button
-                @click="snapshot"
-              >
-                Snapshot
-              </button>
-       </div>
-      <video ref="videoRef" autoplay="true" width="500" id="video"/>
-      <div class="bg-gray-300 h-64 w-64 rounded-lg shadow-md bg-cover bg-center">
-        <img class="w-64" ref="imgRef" src=""
-         alt="sciscors" crossorigin="anonymous">
+      <div v-else class="flex justify-between">
+        <!-- <button @click="stopStreaming">
+          Stop Streaming
+        </button> -->
       </div>
-        <button
-              @click="detect"
-            >
-              <span v-if="isLoading">Loading ... </span>
-              <span v-else>Detect Object</span>
-        </button>
+      <video ref="videoRef" autoplay="true" width="500" id="video" />
+      <div
+        class="bg-gray-300 h-64 w-64 rounded-lg shadow-md bg-cover bg-center"
+      >
+        <img
+          class="w-64"
+          ref="imgRef"
+          src=""
+          alt="sciscors"
+          crossorigin="anonymous"
+        />
+      </div>
+      <button @click="detect">
+        <span v-if="isLoading">Loading ... </span>
+        <span v-else>Detect Object</span>
+      </button>
       <div v-if="result.length > 0">
-              <p>{{ result[0].class }}</p>
-          </div>
+        <p v-for="i in result" :key="i">{{ i.class }} --> {{ i.score }} accurate <br> present at {{ i.bbox }}</p>
+      </div>
     </div>
   </div>
 </template>
 
 <script lang="ts">
 import { ref } from "vue";
-import { defineComponent } from 'vue';
-require('@tensorflow/tfjs-backend-cpu')
-require('@tensorflow/tfjs-backend-webgl')
-const cocoSsd = require('@tensorflow-models/coco-ssd')
+import { defineComponent } from "vue";
+require("@tensorflow/tfjs-backend-cpu");
+require("@tensorflow/tfjs-backend-webgl");
+const cocoSsd = require("@tensorflow-models/coco-ssd");
 const video = document.getElementById("video") as HTMLVideoElement;
 const img = document.getElementById("video") as HTMLImageElement;
 export default defineComponent({
-  name: 'App',
-  setup(){
+  name: "App",
+  setup() {
     const imgRef = ref(img);
     const isLoading = ref(false);
     const videoRef = ref<HTMLVideoElement>(video);
@@ -59,14 +57,14 @@ export default defineComponent({
       result.value = predictions;
       isLoading.value = false;
       console.log(predictions, img);
-    }  
+    }
     async function openCamera() {
       if (navigator.mediaDevices.getUserMedia) {
-        navigator.mediaDevices.getUserMedia({video: true}).then((stream)=>{
-           isStreaming.value = true;
-           
+        navigator.mediaDevices.getUserMedia({ video: true }).then((stream) => {
+          isStreaming.value = true;
+
           videoRef.value.srcObject = stream;
-        })
+        });
       }
     }
     function stopStreaming() {
@@ -84,9 +82,9 @@ export default defineComponent({
       detect();
     }
     openCamera();
-    setInterval(function(){
+    setInterval(function() {
       snapshot();
-    },3000)
+    }, 3000);
     return {
       imgRef,
       detect,
@@ -96,8 +94,8 @@ export default defineComponent({
       openCamera,
       stopStreaming,
       snapshot,
-    }
-  }
+    };
+  },
 });
 </script>
 
