@@ -1,7 +1,7 @@
 <template>
   <div class="w-3/4 m-auto">
     <div>
-      <h1 class="text-2xl text-green-800">Object detection with Tensorflow</h1>
+      <h1 class="text-2xl text-green-800">Object detection with inbuild camara</h1>
       <div v-if="!isStreaming">
         <!-- <button @click="openCamera">Open Camera</button> -->
       </div>
@@ -11,6 +11,9 @@
         </button> -->
       </div>
       <video ref="videoRef" autoplay="true" width="500" id="video" />
+      <div id="can"> 
+
+      </div>
       <div
         class="bg-gray-300 h-64 w-64 rounded-lg shadow-md bg-cover bg-center"
       >
@@ -50,10 +53,26 @@ export default defineComponent({
     const isStreaming = ref(false);
     const result = ref([]);
 
-    async function detect() {
+    async function detect(canvas: HTMLCanvasElement) {
       const img = imgRef.value;
       const model = await cocoSsd.load();
       const predictions = await model.detect(img);
+      console.log(predictions);
+      
+      for(let i=0;i<predictions.length;i++){
+        if(predictions[i].score >0.6){
+          let k = predictions[i].bbox;
+          const ctx = canvas.getContext("2d") as CanvasRenderingContext2D;
+          ctx.beginPath();
+          ctx.rect(k[0],k[1],k[2],k[3]);
+          ctx.stroke();
+          const data = canvas.toDataURL("image/png");
+          imgRef.value.setAttribute("src", data);
+          // for(let j=0;j<k.length;j++){
+          //   console.log(k[j]);
+          // }
+        }
+      }
       result.value = predictions;
       isLoading.value = false;
       console.log(predictions, img);
@@ -79,7 +98,7 @@ export default defineComponent({
       ctx.drawImage(videoRef.value, 0, 0, 200, 200);
       const data = canvas.toDataURL("image/png");
       imgRef.value.setAttribute("src", data);
-      detect();
+      detect(canvas);
     }
     openCamera();
     setInterval(function() {
@@ -95,7 +114,7 @@ export default defineComponent({
       stopStreaming,
       snapshot,
     };
-  },
+  }
 });
 </script>
 
