@@ -11,9 +11,6 @@
         </button> -->
       </div>
       <video ref="videoRef" autoplay="true" width="500" id="video" />
-      <div id="can"> 
-
-      </div>
       <div
         class="bg-gray-300 h-64 w-64 rounded-lg shadow-md bg-cover bg-center"
       >
