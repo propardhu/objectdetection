@@ -1,7 +1,9 @@
 <template>
   <div class="w-3/4 m-auto">
     <div>
-      <h1 class="text-2xl text-green-800">Object detection with inbuild camara</h1>
+      <h1 class="text-2xl text-green-800">
+        Object detection with inbuild camara
+      </h1>
       <div v-if="!isStreaming">
         <!-- <button @click="openCamera">Open Camera</button> -->
       </div>
@@ -10,24 +12,30 @@
           Stop Streaming
         </button> -->
       </div>
-      <video ref="videoRef" autoplay="true" width="500" id="video" />
-      <div
-        class="bg-gray-300 h-64 w-64 rounded-lg shadow-md bg-cover bg-center"
-      >
-        <img
-          class="w-64"
-          ref="imgRef"
-          src=""
-          alt="sciscors"
-          crossorigin="anonymous"
-        />
+      <div class="row">
+        <div class="column">
+          <video ref="videoRef" autoplay="true" width="500" id="video" />
+        </div>
+        <div class="column">
+          <div class="bg-gray-300 rounded-lg shadow-md bg-cover bg-center">
+            <img
+              ref="imgRef"
+              src=""
+              alt=""
+              crossorigin="anonymous"
+            />
+          </div>
+        </div>
       </div>
-      <button @click="detect">
+      <!-- <button @click="detect">
         <span v-if="isLoading">Loading ... </span>
         <span v-else>Detect Object</span>
-      </button>
+      </button> -->
       <div v-if="result.length > 0">
-        <p v-for="i in result" :key="i">{{ i.class }} --> {{ i.score }} accurate <br> present at {{ i.bbox }}</p>
+        <p v-for="i in result" :key="i">
+          {{ i.class }} --> {{ i.score }} accurate <br />
+          present at {{ i.bbox }}
+        </p>
       </div>
     </div>
   </div>
@@ -55,13 +63,13 @@ export default defineComponent({
       const model = await cocoSsd.load();
       const predictions = await model.detect(img);
       console.log(predictions);
-      
-      for(let i=0;i<predictions.length;i++){
-        if(predictions[i].score >0.6){
+
+      for (let i = 0; i < predictions.length; i++) {
+        if (predictions[i].score > 0.6) {
           let k = predictions[i].bbox;
           const ctx = canvas.getContext("2d") as CanvasRenderingContext2D;
           ctx.beginPath();
-          ctx.rect(k[0],k[1],k[2],k[3]);
+          ctx.rect(k[0], k[1], k[2], k[3]);
           ctx.stroke();
           const data = canvas.toDataURL("image/png");
           imgRef.value.setAttribute("src", data);
@@ -72,7 +80,6 @@ export default defineComponent({
       }
       result.value = predictions;
       isLoading.value = false;
-      console.log(predictions, img);
     }
     async function openCamera() {
       if (navigator.mediaDevices.getUserMedia) {
@@ -111,7 +118,7 @@ export default defineComponent({
       stopStreaming,
       snapshot,
     };
-  }
+  },
 });
 </script>
 
@@ -122,6 +129,17 @@ export default defineComponent({
   -moz-osx-font-smoothing: grayscale;
   text-align: center;
   color: #2c3e50;
-  margin-top: 60px;
+  margin-top: 10px;
+}
+.column {
+  float: left;
+  width: 45%;
+}
+
+/* Clear floats after the columns */
+.row:after {
+  content: "";
+  display: table;
+  clear: both;
 }
 </style>
