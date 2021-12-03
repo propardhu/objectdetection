@@ -1,16 +1,16 @@
 <template>
-  <div class="w-3/4 m-auto">
+  <div v-if="open" class="w-3/4 m-auto">
     <div>
       <h1 class="text-2xl text-green-800">
         Object detection with inbuild camara
       </h1>
-      <div v-if="!isStreaming">
-        <!-- <button @click="openCamera">Open Camera</button> -->
+      <div>
+        <button @click="openCamera">Open Camera</button>
       </div>
-      <div v-else class="flex justify-between">
-        <!-- <button @click="stopStreaming">
+      <div class="flex justify-between">
+        <button @click="stopStreaming">
           Stop Streaming
-        </button> -->
+        </button>
       </div>
       <div class="row">
         <div class="column">
@@ -37,7 +37,22 @@
           present at {{ i.bbox }}
         </p>
       </div>
+      <Button @click="open=false" label="open text upderstanding"></Button>
     </div>
+  </div>
+  <div v-else>
+    <Button @click="open=true" label="open video understanding"></Button>
+    <h5>Enter text to be understandable</h5>
+    <Textarea v-model="dataToUnder" :autoResize="true" rows="5" cols="170" /><br>
+    <h5>Enter the question</h5>
+    <Textarea v-model="question" :autoResize="true" rows="5" cols="60" /><br>
+    <Button @click="answer" label="answer"></Button><br>
+    <div v-for="a in ans" :key="a">
+      <span>text:->{{a.text}} score:->{{a.score}} startIndex:->{{a.startIndex}} endIndex:->{{a.endIndex}}</span>
+      <br>
+    </div>
+    
+    
   </div>
 </template>
 
@@ -57,6 +72,11 @@ export default defineComponent({
     const videoRef = ref<HTMLVideoElement>(video);
     const isStreaming = ref(false);
     const result = ref([]);
+    const open = ref(true);
+    const dataToUnder = ref(`Google LLC is an American multinational technology company that specializes in Internet-related services and products, which include online advertising technologies, search engine, cloud computing, software, and hardware. It is considered one of the Big Four technology companies, alongside Amazon, Apple, and Facebook. Google was founded in September 1998 by Larry Page and Sergey Brin while they were Ph.D. students at Stanford University in California. Together they own about 14 percent of its shares and control 56 percent of the stockholder voting power through supervoting stock. They incorporated Google as a California privately held company on September 4, 1998, in California. Google was then reincorporated in Delaware on October 22, 2002. An initial public offering (IPO) took place on August 19, 2004, and Google moved to its headquarters in Mountain View, California, nicknamed the Googleplex. In August 2015, Google announced plans to reorganize its various interests as a conglomerate called Alphabet Inc. Google is Alphabet's leading subsidiary and will continue to be the umbrella company for Alphabet's Internet interests. Sundar Pichai was appointed CEO of Google, replacing Larry Page who became the CEO of Alphabet.`);
+    const question = ref('Who is the CEO of Google?');
+    const ans = ref();
+    const qna = require('@tensorflow-models/qna');
 
     async function detect(canvas: HTMLCanvasElement) {
       const img = imgRef.value;
@@ -104,9 +124,21 @@ export default defineComponent({
       imgRef.value.setAttribute("src", data);
       detect(canvas);
     }
+    async function answer() {
+      try{
+        const model = await qna.load();
+        const a = await model.findAnswers(question.value, dataToUnder.value);
+        ans.value = a
+        console.log(a);
+      }catch(err){
+        console.log(err);
+      }
+    }
     openCamera();
     setInterval(function() {
-      snapshot();
+      if(open.value == true){
+        snapshot();
+      }
     }, 3000);
     return {
       imgRef,
@@ -114,6 +146,11 @@ export default defineComponent({
       result,
       isStreaming,
       videoRef,
+      open,
+      dataToUnder,
+      question,
+      ans,
+      answer,
       openCamera,
       stopStreaming,
       snapshot,
