@@ -9,11 +9,14 @@
   },
   "dependencies": {
     "@tensorflow-models/coco-ssd": "^2.2.2",
+    "@tensorflow-models/qna": "^1.0.0",
     "@tensorflow/tfjs-backend-cpu": "^3.6.0",
     "@tensorflow/tfjs-backend-webgl": "^3.6.0",
     "@tensorflow/tfjs-converter": "^3.6.0",
     "@tensorflow/tfjs-core": "^3.6.0",
     "core-js": "^3.6.5",
+    "primeicons": "^5.0.0",
+    "primevue": "^3.9.1",
     "vue": "^3.0.0"
   },
   "devDependencies": {
