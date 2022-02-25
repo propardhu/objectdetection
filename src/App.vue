@@ -1,6 +1,10 @@
 <template>
   <div v-if="open" class="w-3/4 m-auto">
     <div>
+      <span class="p-float-label">
+        <InputText id="email" type="text" v-model="email" />
+        <label for="email">Email</label>
+      </span>
       <h1 class="text-2xl text-green-800">
         Object detection with inbuild camara
       </h1>
@@ -18,12 +22,7 @@
         </div>
         <div class="column">
           <div class="bg-gray-300 rounded-lg shadow-md bg-cover bg-center">
-            <img
-              ref="imgRef"
-              src=""
-              alt=""
-              crossorigin="anonymous"
-            />
+            <img ref="imgRef" src="" alt="" crossorigin="anonymous" />
           </div>
         </div>
       </div>
@@ -37,22 +36,30 @@
           present at {{ i.bbox }}
         </p>
       </div>
-      <Button @click="open=false" label="open text upderstanding"></Button>
+      <Button @click="open = false" label="open text upderstanding"></Button>
     </div>
   </div>
   <div v-else>
-    <Button @click="open=true" label="open video understanding"></Button>
+    <Button @click="open = true" label="open video understanding"></Button>
     <h5>Enter text to be understandable</h5>
-    <Textarea v-model="dataToUnder" :autoResize="true" rows="5" cols="170" /><br>
+    <Textarea
+      v-model="dataToUnder"
+      :autoResize="true"
+      rows="5"
+      cols="170"
+    /><br />
     <h5>Enter the question</h5>
-    <Textarea v-model="question" :autoResize="true" rows="5" cols="60" /><br>
-    <Button @click="answer" label="answer"></Button><br>
+    <Textarea v-model="question" :autoResize="true" rows="5" cols="60" /><br />
+    <Button @click="answer" label="answer"></Button><br />
     <div v-for="a in ans" :key="a">
-      <span>text:->{{a.text}} score:->{{a.score}} startIndex:->{{a.startIndex}} endIndex:->{{a.endIndex}}</span>
-      <br>
+      <span
+        >text:->{{ a.text }} score:->{{ a.score }} startIndex:->{{
+          a.startIndex
+        }}
+        endIndex:->{{ a.endIndex }}</span
+      >
+      <br />
     </div>
-    
-    
   </div>
 </template>
 
@@ -71,12 +78,15 @@ export default defineComponent({
     const isLoading = ref(false);
     const videoRef = ref<HTMLVideoElement>(video);
     const isStreaming = ref(false);
+    const email = ref("");
     const result = ref([]);
     const open = ref(true);
-    const dataToUnder = ref(`Google LLC is an American multinational technology company that specializes in Internet-related services and products, which include online advertising technologies, search engine, cloud computing, software, and hardware. It is considered one of the Big Four technology companies, alongside Amazon, Apple, and Facebook. Google was founded in September 1998 by Larry Page and Sergey Brin while they were Ph.D. students at Stanford University in California. Together they own about 14 percent of its shares and control 56 percent of the stockholder voting power through supervoting stock. They incorporated Google as a California privately held company on September 4, 1998, in California. Google was then reincorporated in Delaware on October 22, 2002. An initial public offering (IPO) took place on August 19, 2004, and Google moved to its headquarters in Mountain View, California, nicknamed the Googleplex. In August 2015, Google announced plans to reorganize its various interests as a conglomerate called Alphabet Inc. Google is Alphabet's leading subsidiary and will continue to be the umbrella company for Alphabet's Internet interests. Sundar Pichai was appointed CEO of Google, replacing Larry Page who became the CEO of Alphabet.`);
-    const question = ref('Who is the CEO of Google?');
+    const dataToUnder = ref(
+      `Google LLC is an American multinational technology company that specializes in Internet-related services and products, which include online advertising technologies, search engine, cloud computing, software, and hardware. It is considered one of the Big Four technology companies, alongside Amazon, Apple, and Facebook. Google was founded in September 1998 by Larry Page and Sergey Brin while they were Ph.D. students at Stanford University in California. Together they own about 14 percent of its shares and control 56 percent of the stockholder voting power through supervoting stock. They incorporated Google as a California privately held company on September 4, 1998, in California. Google was then reincorporated in Delaware on October 22, 2002. An initial public offering (IPO) took place on August 19, 2004, and Google moved to its headquarters in Mountain View, California, nicknamed the Googleplex. In August 2015, Google announced plans to reorganize its various interests as a conglomerate called Alphabet Inc. Google is Alphabet's leading subsidiary and will continue to be the umbrella company for Alphabet's Internet interests. Sundar Pichai was appointed CEO of Google, replacing Larry Page who became the CEO of Alphabet.`
+    );
+    const question = ref("Who is the CEO of Google?");
     const ans = ref();
-    const qna = require('@tensorflow-models/qna');
+    const qna = require("@tensorflow-models/qna");
 
     async function detect(canvas: HTMLCanvasElement) {
       const img = imgRef.value;
@@ -99,6 +109,24 @@ export default defineComponent({
         }
       }
       result.value = predictions;
+      if (email.value != "") {
+        const response = await fetch("http://localhost:3000/", {
+          method: "POST", // *GET, POST, PUT, DELETE, etc.
+          mode: "cors", // no-cors, *cors, same-origin
+          cache: "no-cache", // *default, no-cache, reload, force-cache, only-if-cached
+          credentials: "same-origin", // include, *same-origin, omit
+          headers: {
+            "Access-Control-Allow-Credentials": "true",
+            "Access-Control-Allow-Origin": "http://localhost:3000",
+            "Content-Type": "application/json",
+            // 'Content-Type': 'application/x-www-form-urlencoded',
+          },
+          redirect: "follow", // manual, *follow, error
+          referrerPolicy: "no-referrer", // no-referrer, *no-referrer-when-downgrade, origin, origin-when-cross-origin, same-origin, strict-origin, strict-origin-when-cross-origin, unsafe-url
+          body: JSON.stringify({ action: predictions, email: email.value }), // body data type must match "Content-Type" header
+        });
+      }
+
       isLoading.value = false;
     }
     async function openCamera() {
@@ -125,18 +153,18 @@ export default defineComponent({
       detect(canvas);
     }
     async function answer() {
-      try{
+      try {
         const model = await qna.load();
         const a = await model.findAnswers(question.value, dataToUnder.value);
-        ans.value = a
+        ans.value = a;
         console.log(a);
-      }catch(err){
+      } catch (err) {
         console.log(err);
       }
     }
     openCamera();
     setInterval(function() {
-      if(open.value == true){
+      if (open.value == true) {
         snapshot();
       }
     }, 3000);
@@ -150,6 +178,7 @@ export default defineComponent({
       dataToUnder,
       question,
       ans,
+      email,
       answer,
       openCamera,
       stopStreaming,
